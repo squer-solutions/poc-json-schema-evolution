@@ -1,0 +1,55 @@
+version: "3"
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: bitnami/zookeeper:3.7.0-debian-10-r114
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    container_name: kafka
+    image: bitnami/kafka:2.8.0-debian-10-r70
+    ports:
+      - "9092:9092"
+      - "9094:9094"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,CLIENT:PLAINTEXT,CLIENT_INTERNAL:PLAINTEXT,CONFIG:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9093,CLIENT://:9092,CLIENT_INTERNAL://:9095,CONFIG://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CONFIG://localhost:9094,INTERNAL://kafka:9093,CLIENT://localhost:9092,CLIENT_INTERNAL://kafka:9095
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
+    depends_on:
+      - zookeeper
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:6.2.0
+    hostname: schema-registry
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRA
+      P_SERVERS: "kafka:9093"
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+
+  akhq:
+    image: tchiotludo/akhq
+    container_name: akhq
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            docker-kafka-server:
+              properties:
+                bootstrap.servers: "kafka:9093"
+              schema-registry:
+                url: "http://schema-registry:8081"
+    ports:
+      - 4040:8080

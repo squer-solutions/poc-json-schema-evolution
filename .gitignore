@@ -1,0 +1,17 @@
+
+# Created by https://www.toptal.com/developers/gitignore/api/java,node,maven,intellij
+# Edit at https://www.toptal.com/developers/gitignore?templates=java,node,maven,intellij
+
+### Intellij ###
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
+# Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
+
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+
+/node_modules/
