@@ -3,18 +3,19 @@ This repo consists of two parts ...
 * test-code exploring the json-schema evolution
 * documentation outlining the findings
 
-To cut straight to the chase, we first outline the findings and describe how to set up and run the tests
-afterwards.
+To cut straight to the chase, we first outline the findings and then describe how to set up and run the tests
+on your own to do your own experimentation / draw your own conclusions.
 
 # JSON-Schema Evolution
 JSON-Schema is one of the schema types supported by the Confluent Schema Registry. It is not prominently mentioned in the
-documentation, which is why we decided to spend some tome 
+documentation, leading one to assume that it behaves just like AVRO does. It doesn't. The canonical explanation referenced
+in issues on the Confluent Schema Registry [repository](https://github.com/confluentinc/schema-registry/) is 
+[this](https://yokota.blog/2021/03/29/understanding-json-schema-compatibility/).
+
+Since it was not immediately obvious to us how this translates into using json-schema we did some experimentation.
 
 ## FORWARD Compatibility
 > Forward compatibility – all documents that conform to the new version are also valid according to the previous version of the schema
-
-Forward compatibility is often used for documents and events. It allows old clients to still read the new documents,
-decoupling provider from client changes.
 
 | AdditionalProperties | true | false |
 |----------------------|------|-------|
@@ -23,13 +24,10 @@ decoupling provider from client changes.
 | Remove optional      | :x: | :heavy_check_mark: |
 | Remove mandatory     | :x: | :x: |
 
-Forward Compatible topics can transition from `true` -> `false` for `additionalProperties`. The other way around isn't possible.
+Forward Compatible topics can **only** transition from `true` -> `false` for `additionalProperties`.
 
 ## BACKWARD Compatibility
 > Backward compatibility – all documents that conform to the previous version of the schema are also valid according to the new version.
-
-Backward compatibility is often used for defining Commands your service accepts. This allows old versions of clients 
-to continue using us with old versions of their software, decoupling provider from consumer's changes.
 
 | AdditionalProperties | true | false |
 |----------------------|------|-------|
@@ -38,14 +36,15 @@ to continue using us with old versions of their software, decoupling provider fr
 | Remove optional      | :x: | :x: |
 | Remove mandatory     | :x: | :x: |
 
-WARNING WARNING WARNING:
+**WARNING:**
 Transitioning from `additionalProperties=true` to `false` is not possible! Therefore if you don't pay attention,
 you won't be able to modify the schema at all!
 
+## Rollbacks
 It should be noted that you can use old versions of schemas! Meaning that rollbacks and rolling updates are possible for
 both FORWARD and BACKWARD compatible schemas.
 
-### Addendum: What is additionalProperties?
+## Addendum: What is additionalProperties?
 As seen above, additionalProperties has a big impact on the compatibility of the kafka models.To not reiterate what has 
 already been said better, you can read up on the open, closed and partially open content models in 
 json-schema [here](https://yokota.blog/2021/03/29/understanding-json-schema-compatibility/).
@@ -61,6 +60,15 @@ Similar reasoning applies to BACKWARD compatibility. We cannot add any fields be
 in "anything else could be part of it as well." - by introducing a new field we'd be asking for a conflict according to json-schema.
 
 This presents us with severe constraints on BACKWARDS compatibility.
+
+## Final Notes
+Please feel free to contribute and give feedback - we'd be happy to learn more and/or to get a more complete suite of tests showing
+what is an isn't possible.
+
+## Related Issues
+* https://github.com/confluentinc/schema-registry/issues/1458
+* https://github.com/confluentinc/schema-registry/issues/1778
+* https://github.com/confluentinc/schema-registry/issues/2121
 
 # Setup and Running the Tests
 ### Getting Started with NodeJS
@@ -89,6 +97,3 @@ To execute the exploratory tests, run...
 ```shell
 npm run test
 ```
-
-# Final Notes
-Please feel free to contribute and give feedback - we'd be happy to learn more!
