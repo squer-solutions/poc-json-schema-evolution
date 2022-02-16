@@ -1,19 +1,6 @@
 import axios from "axios";
 import {v4 as uuidv4} from "uuid";
 
-const BASE_SCHEMA = {
-  required: ["A"],
-  properties: {
-    A: {
-      type: "string",
-    },
-    B: {
-      type: "string",
-    },
-  },
-  additionalProperties: false,
-};
-
 const SCHEMA_REGISTRY_BASE_URL = "http://localhost:8081";
 
 beforeAll(async () => {
@@ -21,8 +8,8 @@ beforeAll(async () => {
   await axios.get(`${SCHEMA_REGISTRY_BASE_URL}/schemas/types`);
 });
 
-describe("FORWARD Compatible topic - additionalProperties = false:", () => {
-  it("adding an optional field should fail", async () => {
+describe("FORWARD | additionalProperties = false:", () => {
+  it("adding optional: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "FORWARD");
 
     registeredSchema.properties["C"] = {
@@ -33,12 +20,12 @@ describe("FORWARD Compatible topic - additionalProperties = false:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("adding a mandatory field should fail", async () => {
+  it("adding mandatory: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "FORWARD");
 
     registeredSchema.required.push("C");
@@ -51,12 +38,12 @@ describe("FORWARD Compatible topic - additionalProperties = false:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("removing a mandatory field should fail", async () => {
+  it("removing mandatory: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "FORWARD");
 
     delete registeredSchema.required;
@@ -66,12 +53,12 @@ describe("FORWARD Compatible topic - additionalProperties = false:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("removing an optional field should be possible", async () => {
+  it("removing optional: allowed", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "FORWARD");
 
     delete registeredSchema.properties.B;
@@ -79,14 +66,13 @@ describe("FORWARD Compatible topic - additionalProperties = false:", () => {
     try {
       await setOrUpdateSchema(schemaId, registeredSchema);
     } catch (e) {
-      console.log(e);
-      fail("Update failed.");
+      fail(`Update failed ${e.response.status}`);
     }
   });
 });
 
-describe("FORWARD Compatible topic - additionalProperties = true:", () => {
-  it("adding an optional field should succeed", async () => {
+describe("FORWARD | additionalProperties = true:", () => {
+  it("adding optional: allowed", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(true, "FORWARD");
 
     registeredSchema.properties["C"] = {
@@ -96,12 +82,11 @@ describe("FORWARD Compatible topic - additionalProperties = true:", () => {
     try {
       await setOrUpdateSchema(schemaId, registeredSchema);
     } catch (e) {
-      console.log(e);
-      fail("Failed unexpectedly.");
+      fail(`Update failed ${e.response.status}`);
     }
   });
 
-  it("adding a mandatory field should succeed", async () => {
+  it("adding mandatory: allowed", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(true, "FORWARD");
 
     registeredSchema.required.push("C");
@@ -113,12 +98,11 @@ describe("FORWARD Compatible topic - additionalProperties = true:", () => {
     try {
       await setOrUpdateSchema(schemaId, registeredSchema);
     } catch (e) {
-      console.log(e);
-      fail("Failed unexpectedly.");
+      fail(`Update failed ${e.response.status}`);
     }
   });
 
-  it("removing a mandatory field should fail", async () => {
+  it("removing mandatory: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(true, "FORWARD");
 
     delete registeredSchema.required;
@@ -128,12 +112,12 @@ describe("FORWARD Compatible topic - additionalProperties = true:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("removing an optional field should fail", async () => {
+  it("removing optional: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(true, "FORWARD");
 
     delete registeredSchema.properties.B;
@@ -142,14 +126,14 @@ describe("FORWARD Compatible topic - additionalProperties = true:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 });
 
-describe("BACKWARD Compatible topic - additionalProperties = false:", () => {
-  it("adding an optional field should succeed", async () => {
+describe("BACKWARD | additionalProperties = false:", () => {
+  it("adding optional: allowed", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "BACKWARD");
 
     registeredSchema.properties["C"] = {
@@ -159,12 +143,11 @@ describe("BACKWARD Compatible topic - additionalProperties = false:", () => {
     try {
       await setOrUpdateSchema(schemaId, registeredSchema);
     } catch (e) {
-      console.log(e);
-      fail("Update failed.");
+      fail(`Update failed ${e.response.status}`);
     }
   });
 
-  it("adding a mandatory field should fail", async () => {
+  it("adding mandatory: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "BACKWARD");
 
     registeredSchema.required.push("C");
@@ -177,12 +160,12 @@ describe("BACKWARD Compatible topic - additionalProperties = false:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("removing a mandatory field should fail", async () => {
+  it("removing mandatory: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "BACKWARD");
 
     delete registeredSchema.required;
@@ -192,12 +175,12 @@ describe("BACKWARD Compatible topic - additionalProperties = false:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("removing an optional field should fail", async () => {
+  it("removing optional: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(false, "BACKWARD");
 
     delete registeredSchema.properties.B;
@@ -206,14 +189,14 @@ describe("BACKWARD Compatible topic - additionalProperties = false:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 });
 
-describe("BACKWARD Compatible topic - additionalProperties = true:", () => {
-  it("adding an optional field should fail", async () => {
+describe("BACKWARD | additionalProperties = true:", () => {
+  it("adding optional: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(true, "BACKWARD");
 
     registeredSchema.properties["C"] = {
@@ -224,13 +207,13 @@ describe("BACKWARD Compatible topic - additionalProperties = true:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("adding a mandatory field should fail", async () => {
-    const { schemaId, registeredSchema } = await setBaseSchema(true, "BACKWARD");
+  it("adding mandatory: forbidden", async () => {
+    const {schemaId, registeredSchema} = await setBaseSchema(true, "BACKWARD");
 
     registeredSchema.required.push("C");
 
@@ -242,12 +225,12 @@ describe("BACKWARD Compatible topic - additionalProperties = true:", () => {
       await setOrUpdateSchema(schemaId, registeredSchema);
       fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
+      console.log("Failed as expected:", e.response.status);
       return true;
     }
   });
 
-  it("removing a mandatory field should fail", async () => {
+  it("removing mandatory: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(true, "BACKWARD");
 
     delete registeredSchema.required;
@@ -255,24 +238,20 @@ describe("BACKWARD Compatible topic - additionalProperties = true:", () => {
 
     try {
       await setOrUpdateSchema(schemaId, registeredSchema);
-      fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
-      return true;
+      fail(`Update failed ${e.response.status}`);
     }
   });
 
-  it("removing an optional field should fail", async () => {
+  it("removing optional: forbidden", async () => {
     const { schemaId, registeredSchema } = await setBaseSchema(true, "BACKWARD");
 
     delete registeredSchema.properties.B;
 
     try {
       await setOrUpdateSchema(schemaId, registeredSchema);
-      fail("Succeeded unexpectedly.");
     } catch (e) {
-      console.log("Failed as expected.");
-      return true;
+      fail(`Update failed ${e.response.status}`);
     }
   });
 });
@@ -284,16 +263,19 @@ const setBaseSchema = async (
   const schemaId = uuidv4();
 
   const schemaToRegister = {
-    ...BASE_SCHEMA,
+      required: ["A"],
+      properties: {
+        A: {
+          type: "string",
+        },
+        B: {
+          type: "string",
+        },
+      },
+      additionalProperties: setAdditionalProperties,
   };
 
-  schemaToRegister.additionalProperties = setAdditionalProperties;
-
-  try {
-    await setOrUpdateSchema(schemaId, schemaToRegister);
-  } catch (e) {
-    console.log(e);
-  }
+  await setOrUpdateSchema(schemaId, schemaToRegister);
 
   await axios.put(`${SCHEMA_REGISTRY_BASE_URL}/config/${schemaId}`, { compatibility: compatibility });
 
@@ -301,6 +283,8 @@ const setBaseSchema = async (
 };
 
 const setOrUpdateSchema = async (id: string, schema: any) => {
+  console.debug("Registering: \n", schema);
+
   await axios.post(
     `${SCHEMA_REGISTRY_BASE_URL}/subjects/${id}/versions`,
     {
