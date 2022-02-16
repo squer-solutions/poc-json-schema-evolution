@@ -37,8 +37,7 @@ Forward Compatible topics can **only** transition from `true` -> `false` for `ad
 | Remove mandatory     | :heavy_check_mark: | :x: |
 
 **WARNING:**
-Transitioning from `additionalProperties=true` to `false` is not possible! Therefore if you don't pay attention,
-you won't be able to add any fields to your schema.
+Transitioning from `additionalProperties=true` to `false` is not possible! 
 
 ## Rollbacks
 It should be noted that you can use old versions of schemas! Meaning that rollbacks and rolling updates are possible for
