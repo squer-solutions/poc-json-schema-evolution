@@ -51,4 +51,4 @@ services:
               schema-registry:
                 url: "http://schema-registry:8081"
     ports:
-      - 4040:8080
+      - "4040:8080"

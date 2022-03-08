@@ -1,0 +1,15 @@
+#!/bin/bash
+
+## Configures and starts the Schema Registry
+
+set -euo pipefail
+
+(cat <<EOF
+debug=true
+host.name=$SCHEMA_REGISTRY_HOST_NAME
+kafkastore.bootstrap.servers=$SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS
+listeners=$SCHEMA_REGISTRY_LISTENERS
+EOF
+) > etc/schema-registry/schema-registry.properties
+
+bin/schema-registry-start etc/schema-registry/schema-registry.properties

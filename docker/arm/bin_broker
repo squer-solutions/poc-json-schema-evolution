@@ -1,0 +1,14 @@
+#!/bin/bash
+
+## Configures and starts the Kafka broker
+
+set -euo pipefail
+
+(cat <<EOF
+advertised.listeners=$KAFKA_ADVERTISED_LISTENERS
+debug=true
+zookeeper.connect=$KAFKA_ZOOKEEPER_CONNECT
+EOF
+) >> etc/kafka/server.properties
+
+bin/kafka-server-start etc/kafka/server.properties
